@@ -3788,12 +3788,12 @@ function get_with_capability_join(context $context, $capability, $useridcolumn) 
                 } else if (!empty($needed[$cap][$defaultuserroleid]) ||
                         ($isfrontpage && !empty($needed[$cap][$defaultfrontpageroleid]))) {
                     // Everybody except the prohibited - hiding does not matter.
-                    $unions[] = "SELECT id AS userid
-                                   FROM {user}
-                                  WHERE id NOT IN (SELECT userid
-                                                     FROM {role_assignments}
-                                                    WHERE contextid IN ($ctxids)
-                                                          AND roleid IN (" . implode(',', array_keys($prohibited[$cap])) . "))";
+                    $unions[] = "SELECT u.id AS userid
+                                   FROM {user} u
+                              LEFT JOIN {role_assignments} ra ON ra.userid = u.id
+                                        AND ra.contextid IN ($ctxids)
+                                        AND ra.roleid IN (" . implode(',', array_keys($prohibited[$cap])) . ")
+                                  WHERE ra.userid IS NULL";
 
                 } else {
                     $unions[] = "SELECT ra.userid
